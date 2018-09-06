@@ -1,3 +1,4 @@
+'use strict';
 
 const express = require('express');
 const router = express.Router();
@@ -108,6 +109,28 @@ app.post('/recipes', jsonParser, (req, res) => {
 app.delete('/recipes/:id', (req, res) => {
   Recipes.delete(req.params.id);
   console.log(`Deleted recipe \`${req.params.ID}\``);
+  res.status(204).end();
+});
+
+app.put('/recipes/:id', jsonParser, (req, res) => {
+  const requiredFields = ["name", "ingredients"];
+  for(let i = 0; i < requiredFields.length; i++) {
+    if(!(requiredFields[i] in req.body)) {
+      const message = `Missing \`${requiredFields[i]}\` in request body`;
+      console.error(message);
+      return res.status(400).send(message);
+    }
+  }
+   if(req.params.id !== req.body.id) {
+     const message = `${req.params.id} and ${req.body.id} must match`;
+     console.error(message);
+     return res.status(400).send(message);
+   }
+  Recipes.update({
+    id: req.params.id,
+    name: req.body.name,
+    ingredients: req.body.ingredients
+  });
   res.status(204).end();
 });
 
